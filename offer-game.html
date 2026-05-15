@@ -5,9 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Offer 开箱模拟器</title>
   <style>
-    /* ============================================
-       RESET & BASE
-    ============================================ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html, body {
       width: 100%; height: 100%;
@@ -18,18 +15,14 @@
       touch-action: manipulation;
     }
 
-    /* ============================================
-       PARTICLES BACKGROUND
-    ============================================ */
+    /* Particles Background */
     #particles-canvas {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
       z-index: 0; pointer-events: none;
     }
 
-    /* ============================================
-       SCREEN WRAPPER
-    ============================================ */
+    /* Screen Wrapper */
     .screen {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 100%;
@@ -46,9 +39,7 @@
       pointer-events: all;
     }
 
-    /* ============================================
-       GLOBAL ELEMENTS
-    ============================================ */
+    /* Global Elements */
     .neon-title {
       font-size: clamp(28px, 7vw, 48px);
       font-weight: 900;
@@ -62,7 +53,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-
     .neon-sub {
       font-size: 15px;
       color: #94a3b8;
@@ -70,7 +60,6 @@
       margin-top: 12px;
       line-height: 1.6;
     }
-
     .btn-primary {
       position: relative;
       padding: 16px 40px;
@@ -94,7 +83,6 @@
       background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15));
       border-radius: inherit;
     }
-
     .progress-bar-wrap {
       position: fixed; top: 0; left: 0;
       width: 100%; height: 4px;
@@ -107,7 +95,6 @@
       transition: width 0.4s ease;
       box-shadow: 0 0 8px #a855f7;
     }
-
     .step-indicator {
       position: fixed;
       top: 16px; right: 16px;
@@ -116,9 +103,7 @@
       z-index: 100;
     }
 
-    /* ============================================
-       SCREEN 1: INTRO
-    ============================================ */
+    /* Screen 1: Intro */
     #screen-intro { gap: 0; justify-content: center; }
     .intro-envelope {
       width: 120px; height: 90px;
@@ -155,9 +140,58 @@
       100% { transform: rotate(360deg); }
     }
 
-    /* ============================================
-       SCREEN 2: FORM
-    ============================================ */
+    /* Screen 2: Login */
+    #screen-login { justify-content: center; }
+    .login-card {
+      width: 100%; max-width: 360px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .login-icon { font-size: 48px; margin-bottom: 16px; }
+    .login-title {
+      font-size: 20px; font-weight: 800;
+      color: #f1f5f9; margin-bottom: 8px;
+    }
+    .login-sub { font-size: 13px; color: #94a3b8; margin-bottom: 24px; line-height: 1.6; }
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none; border-radius: 50px;
+      color: #fff; font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+      margin-bottom: 12px;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+    }
+    .login-soon-badge {
+      display: inline-block;
+      background: rgba(251,191,36,0.15);
+      border: 1px solid rgba(251,191,36,0.3);
+      color: #fbbf24;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      margin-left: 6px;
+    }
+    .login-mock-phone {
+      font-size: 13px; color: #64748b; margin-bottom: 16px;
+    }
+    .login-skip {
+      font-size: 13px; color: #64748b;
+      cursor: pointer; text-decoration: underline;
+    }
+    .login-note {
+      font-size: 11px; color: #475569;
+      margin-top: 16px; line-height: 1.5;
+    }
+
+    /* Screen 3: Form */
     #screen-form { justify-content: flex-start; padding-top: 60px; }
     .form-card {
       width: 100%; max-width: 420px;
@@ -216,10 +250,14 @@
       border-color: #a855f7;
       color: #e9d5ff;
     }
+    .major-tier-info {
+      margin-top: 8px;
+      font-size: 11px;
+      color: #64748b;
+      text-align: center;
+    }
 
-    /* ============================================
-       SCREEN 3: QUIZ
-    ============================================ */
+    /* Screen 4: Quiz */
     #screen-quiz { justify-content: flex-start; padding-top: 60px; }
     .quiz-card {
       width: 100%; max-width: 420px;
@@ -279,32 +317,29 @@
       border-color: #3b82f6;
       color: #fff;
     }
-
-    .power-bar-wrap {
+    .luck-bar-wrap {
       width: 100%; max-width: 420px;
       margin-top: 24px;
     }
-    .power-label {
+    .luck-label {
       display: flex; justify-content: space-between;
       font-size: 12px; color: #94a3b8;
       margin-bottom: 6px;
     }
-    .power-bar-bg {
+    .luck-bar-bg {
       height: 8px;
       background: rgba(255,255,255,0.08);
       border-radius: 4px;
       overflow: hidden;
     }
-    .power-bar-fill {
+    .luck-bar-fill {
       height: 100%;
-      background: linear-gradient(90deg, #a855f7, #fbbf24);
+      background: linear-gradient(90deg, #ec4899, #a855f7, #fbbf24);
       border-radius: 4px;
       transition: width 0.5s ease;
     }
 
-    /* ============================================
-       SCREEN 4: UNBOXING
-    ============================================ */
+    /* Screen 5: Unboxing */
     #screen-unbox { justify-content: center; gap: 0; }
     .unbox-container {
       display: flex; flex-direction: column;
@@ -335,7 +370,6 @@
       transform: translateX(-50%);
       animation: spin-star 3s linear infinite;
     }
-
     .unbox-text {
       font-size: 18px;
       color: #fbbf24;
@@ -372,9 +406,7 @@
       opacity: 0.5;
       filter: blur(4px);
     }
-    .offer-country-flag {
-      font-size: 36px; margin-bottom: 10px;
-    }
+    .offer-country-flag { font-size: 36px; margin-bottom: 10px; }
     .offer-school-name {
       font-size: 20px;
       font-weight: 800;
@@ -390,10 +422,7 @@
       font-weight: 600;
       margin-bottom: 8px;
     }
-    .offer-rank {
-      font-size: 12px;
-      color: #94a3b8;
-    }
+    .offer-rank { font-size: 12px; color: #94a3b8; }
     .offer-badge {
       position: absolute; top: -8px; right: -8px;
       background: #ef4444;
@@ -406,9 +435,7 @@
       box-shadow: 0 0 10px rgba(239,68,68,0.5);
     }
 
-    /* ============================================
-       SCREEN 5: RESULT
-    ============================================ */
+    /* Screen 6: Result */
     #screen-result { justify-content: flex-start; padding-top: 60px; overflow-y: auto; }
     .result-container {
       width: 100%; max-width: 420px;
@@ -416,9 +443,7 @@
       align-items: center;
       padding-bottom: 40px;
     }
-    .result-header {
-      text-align: center; margin-bottom: 24px;
-    }
+    .result-header { text-align: center; margin-bottom: 24px; }
     .result-main-card {
       width: 100%;
       background: linear-gradient(135deg, #1a1a2e, #16213e);
@@ -448,9 +473,7 @@
       font-size: 15px; color: #fbbf24;
       font-weight: 600; margin-bottom: 8px;
     }
-    .result-rank {
-      font-size: 13px; color: #94a3b8; margin-bottom: 16px;
-    }
+    .result-rank { font-size: 13px; color: #94a3b8; margin-bottom: 16px; }
     .result-badges {
       display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
     }
@@ -475,19 +498,17 @@
       display: flex; align-items: center; gap: 12px;
     }
     .sub-card .sc-flag { font-size: 24px; }
-    .sub-card .sc-info {}
     .sc-school { font-size: 15px; font-weight: 700; color: #e2e8f0; }
     .sc-major { font-size: 12px; color: #94a3b8; }
     .sc-tag {
       margin-left: auto;
       font-size: 10px; padding: 3px 8px;
       background: rgba(59, 130, 246, 0.15);
-      border: 1px solid rgba(59, 130, 246, 0.3);
+      border: 1px solid rgba(59, 130, 246, 3);
       border-radius: 10px;
       color: #93c5fd;
       white-space: nowrap;
     }
-
     .result-tip {
       width: 100%;
       background: rgba(251, 191, 36, 0.08);
@@ -504,7 +525,6 @@
       font-size: 13px; color: #94a3b8;
       line-height: 1.6;
     }
-
     .result-cta {
       width: 100%;
       background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.1));
@@ -539,56 +559,11 @@
       cursor: pointer;
     }
 
-    /* ============================================
-       PHONE LOGIN SCREEN
-    ============================================ */
-    #screen-login { justify-content: center; }
-    .login-card {
-      width: 100%; max-width: 360px;
-      background: rgba(255,255,255,0.05);
-      border: 1px solid rgba(168, 85, 247, 0.2);
-      border-radius: 24px;
-      padding: 36px 28px;
-      text-align: center;
-      backdrop-filter: blur(10px);
-    }
-    .login-icon { font-size: 48px; margin-bottom: 16px; }
-    .login-title {
-      font-size: 20px; font-weight: 800;
-      color: #f1f5f9; margin-bottom: 8px;
-    }
-    .login-sub { font-size: 13px; color: #94a3b8; margin-bottom: 24px; line-height: 1.6; }
-    .login-btn {
-      width: 100%;
-      padding: 16px;
-      background: linear-gradient(135deg, #7c3aed, #a855f7);
-      border: none; border-radius: 50px;
-      color: #fff; font-size: 16px; font-weight: 700;
-      cursor: pointer;
-      box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
-      margin-bottom: 12px;
-    }
-    .login-skip {
-      font-size: 12px; color: #64748b;
-      cursor: pointer; text-decoration: underline;
-    }
-    .login-note {
-      font-size: 11px; color: #475569;
-      margin-top: 16px; line-height: 1.5;
-    }
-
-    /* ============================================
-       GLOW / ANIMATION UTILS
-    ============================================ */
     @keyframes pulse-glow {
       0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
       50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.6); }
     }
     .glow { animation: pulse-glow 2s ease-in-out infinite; }
-
-    /* ============================================
-       UTILITY
-    ============================================ */
     .hidden { display: none !important; }
     .fade-in { animation: fadeIn 0.5s ease forwards; }
     @keyframes fadeIn {
@@ -620,22 +595,26 @@
     你的 <span class="accent">留学 Offer</span><br>会是什么？
   </h1>
   <p class="neon-sub">
-    通过趣味测试<br>揭晓你命中注定的名校 Offer
+    趣味测试揭晓命运<br>刷一刷，看你能开出哪所名校！
   </p>
-  <button class="btn-primary glow" onclick="goLogin()">开始探索 →</button>
+  <button class="btn-primary glow" onclick="goLogin()">开始抽 Offer →</button>
 </div>
 
 <!-- SCREEN 2: LOGIN -->
 <div class="screen" id="screen-login">
   <div class="login-card">
-    <div class="login-icon">🎁</div>
-    <div class="login-title">解锁完整版 Offer 报告</div>
-    <div class="login-sub">填写手机号，领取属于你的<br>独家留学规划方案</div>
-    <button class="login-btn" onclick="simulateLogin()">📱 一键获取手机号登录</button>
-    <div class="login-skip" onclick="skipLogin()">跳过，直接体验游戏</div>
+    <div class="login-icon">📱</div>
+    <div class="login-title">解锁完整版报告</div>
+    <div class="login-sub">一键登录，领取专属留学规划</div>
+    <button class="login-btn" onclick="simulateLogin()">
+      🔐 一键获取手机号登录
+      <span class="login-soon-badge">即将上线</span>
+    </button>
+    <div class="login-mock-phone" id="mock-phone-hint"></div>
+    <div class="login-skip" onclick="skipLogin()">跳过，直接开箱 →</div>
     <div class="login-note">
-      登录后解锁：完整 Offer 报告 + 专属留学方案<br>
-      您的信息将被严格保密，仅用于留学咨询
+      登录功能正在接入中<br>
+      现在可先体验完整游戏流程 ✨
     </div>
   </div>
 </div>
@@ -645,51 +624,33 @@
   <h2 class="neon-title" style="font-size:clamp(22px,5vw,30px);margin-bottom:4px">
     先了解一下 <span class="accent">你</span>
   </h2>
-  <p class="neon-sub" style="margin-bottom:0">填写基本信息，生成专属 Offer</p>
+  <p class="neon-sub" style="margin-bottom:0;color:#fbbf24">
+    🎰 手气越好，开出的学校越厉害！
+  </p>
   <div class="form-card">
-    <!-- GPA -->
+    <!-- Country (order determines main offer source) -->
     <div class="form-group">
-      <label class="form-label">📊 你的成绩水平</label>
-      <div class="radio-group" id="gpa-group">
-        <div class="radio-item" data-val="3.8+">优秀 (85%+ / A)</div>
-        <div class="radio-item" data-val="3.5+">良好 (75-84% / B+)</div>
-        <div class="radio-item" data-val="3.0+">中等 (65-74% / B)</div>
-        <div class="radio-item" data-val="2.5">一般 (60-64% / C)</div>
-      </div>
-    </div>
-    <!-- Language -->
-    <div class="form-group">
-      <label class="form-label">🗣️ 语言成绩（雅思）</label>
-      <div class="radio-group" id="lang-group">
-        <div class="radio-item" data-val="7.5+">7.5 分以上</div>
-        <div class="radio-item" data-val="7.0">7.0 分</div>
-        <div class="radio-item" data-val="6.5">6.5 分</div>
-        <div class="radio-item" data-val="6.0">6.0 分以下 / 暂无</div>
-      </div>
-    </div>
-    <!-- Country -->
-    <div class="form-group">
-      <label class="form-label">🌏 意向留学国家（可多选）</label>
+      <label class="form-label">🌏 意向国家（决定 Offer 来源地）</label>
       <div class="radio-group" id="country-group">
-        <div class="radio-item country-item selected" data-val="uk">🇬🇧 英国</div>
-        <div class="radio-item country-item selected" data-val="hk">🇭🇰 中国香港</div>
-        <div class="radio-item country-item selected" data-val="au">🇦🇺 澳大利亚</div>
-        <div class="radio-item country-item selected" data-val="sg">🇸🇬 新加坡</div>
+        <div class="radio-item country-item selected" data-val="uk" data-flag="🇬🇧">🇬🇧 英国</div>
+        <div class="radio-item country-item selected" data-val="hk" data-flag="🇭🇰">🇭🇰 香港</div>
+        <div class="radio-item country-item selected" data-val="au" data-flag="🇦🇺">🇦🇺 澳洲</div>
+        <div class="radio-item country-item selected" data-val="sg" data-flag="🇸🇬">🇸🇬 新加坡</div>
       </div>
     </div>
-    <!-- Major -->
+    <!-- Luck Tier -->
     <div class="form-group">
-      <label class="form-label">🎯 意向专业方向</label>
-      <select class="form-select" id="major-select">
-        <option value="business">商科（金融、会计、管理）</option>
-        <option value="stem">理工科（计算机、工程、数据）</option>
-        <option value="arts">文科艺术（教育、传媒、设计）</option>
-        <option value="law">法学</option>
-        <option value="unknown">还没想好</option>
-      </select>
+      <label class="form-label">💎 你的留学手气指数</label>
+      <div class="radio-group" id="luck-group">
+        <div class="radio-item" data-val="3" data-label="欧皇附体">🌟 欧皇本皇</div>
+        <div class="radio-item" data-val="2" data-label="运气不错">🍀 运气不错</div>
+        <div class="radio-item" data-val="1" data-label="稳扎稳打">📚 稳扎稳打</div>
+        <div class="radio-item" data-val="0" data-label="保守型">🛡️ 保守型</div>
+      </div>
+      <div class="major-tier-info">选择的手气越好，学校档次越豪华！</div>
     </div>
     <button class="btn-primary" style="width:100%;text-align:center;margin-top:8px" onclick="submitForm()">
-      生成我的 Offer →
+      🎲 开始抽 Offer →
     </button>
   </div>
 </div>
@@ -697,17 +658,17 @@
 <!-- SCREEN 4: QUIZ -->
 <div class="screen" id="screen-quiz">
   <div class="quiz-card">
-    <div class="quiz-q-num" id="quiz-q-num">第 1 题 / 共 5 题</div>
+    <div class="quiz-q-num" id="quiz-q-num">第 1 题 / 共 3 题</div>
     <div class="quiz-question" id="quiz-question"></div>
     <div class="quiz-options" id="quiz-options"></div>
   </div>
-  <div class="power-bar-wrap">
-    <div class="power-label">
-      <span>申请实力值</span>
-      <span id="power-val">0</span>
+  <div class="luck-bar-wrap">
+    <div class="luck-label">
+      <span>🎰 命运值</span>
+      <span id="luck-val">0</span>
     </div>
-    <div class="power-bar-bg">
-      <div class="power-bar-fill" id="power-fill" style="width:0%"></div>
+    <div class="luck-bar-bg">
+      <div class="luck-bar-fill" id="luck-fill" style="width:0%"></div>
     </div>
   </div>
 </div>
@@ -715,8 +676,8 @@
 <!-- SCREEN 5: UNBOXING -->
 <div class="screen" id="screen-unbox">
   <div class="unbox-container">
-    <div class="unbox-text" id="unbox-text">🎰 开启你的命运信封...</div>
-    <div class="unbox-sub">命运的齿轮开始转动</div>
+    <div class="unbox-text" id="unbox-text">🎰 命运齿轮转动中...</div>
+    <div class="unbox-sub">看你能开出什么神仙学校</div>
     <div class="envelope-big">
       <div class="e-flap"></div>
       <div class="e-body">
@@ -740,7 +701,7 @@
 <div class="screen" id="screen-result">
   <div class="result-container">
     <div class="result-header">
-      <p class="neon-sub" style="margin-bottom:0">🎉 恭喜你获得了</p>
+      <p class="neon-sub" style="margin-bottom:0">🎉 你抽到了</p>
     </div>
     <div class="result-main-card">
       <div class="result-flag" id="res-flag"></div>
@@ -751,140 +712,169 @@
     </div>
     <div class="result-sub-cards" id="res-sub-cards"></div>
     <div class="result-tip">
-      <div class="result-tip-title">💡 Emma 说</div>
+      <div class="result-tip-title">💬 温馨提醒</div>
       <div class="result-tip-body" id="res-tip"></div>
     </div>
     <div class="result-cta">
-      <div class="result-cta-title">想拿到真正的 Offer？</div>
+      <div class="result-cta-title">这只是游戏 🎮</div>
       <div class="result-cta-sub">
-        游戏只是开始，真实的申请比这更精彩。<br>
-        让 Emma 帮你制定专属留学规划！
+        真实的申请比这更精彩！<br>
+        想知道你能申到哪所？让 Emma 帮你评估！
       </div>
       <a class="cta-btn-emma" href="https://work.wujimai.com/contact.html" target="_blank">
-        👩‍🏫 立即咨询 Emma
+        👩‍🏫 找 Emma 聊聊
       </a>
-      <div class="result-share" onclick="shareResult()">📤 炫耀一下我的 Offer</div>
+      <div class="result-share" onclick="shareResult()">📤 炫耀一下我的欧气</div>
     </div>
   </div>
 </div>
 
 <script>
 /* ============================================
-   GAME DATA
+   GAME DATA — Pure entertainment, random results
 ============================================ */
 
-const SCHOOLS = {
-  uk: {
-    flagship: [
-      { school:'帝国理工学院', major:'MSc Management', rank:'QS 世界第6', flag:'🇬🇧', badge:'G5超精英' },
-      { school:'伦敦大学学院', major:'MSc Computer Science', rank:'QS 世界第9', flag:'🇬🇧', badge:'G5超精英' },
-      { school:'爱丁堡大学', major:'MSc Artificial Intelligence', rank:'QS 世界第22', flag:'🇬🇧', badge:'红砖名校' },
-      { school:'曼彻斯特大学', major:'MSc Finance', rank:'QS 世界第34', flag:'🇬🇧', badge:'红砖名校' },
-      { school:'伦敦国王学院', major:'MA Education', rank:'QS 世界第40', flag:'🇬🇧', badge:'金三角名校' },
-      { school:'布里斯托大学', major:'MSc Data Science', rank:'QS 世界第54', flag:'🇬🇧', badge:'工程劲旅' },
-      { school:'华威大学', major:'MSc Business Analytics', rank:'QS 世界第67', flag:'🇬🇧', badge:'商科强校' },
-      { school:'格拉斯哥大学', major:'MSc Software Engineering', rank:'QS 世界第78', flag:'🇬🇧', badge:'老牌名校' },
-    ],
-    backup: [
-      { school:'谢菲尔德大学', major:'MA Media and Communication', rank:'QS 世界前100', flag:'🇬🇧', badge:'保底' },
-      { school:'伯明翰大学', major:'MSc Marketing', rank:'QS 世界前100', flag:'🇬🇧', badge:'保底' },
-      { school:'利兹大学', major:'MSc Fashion Management', rank:'QS 世界前100', flag:'🇬🇧', badge:'保底' },
-    ]
-  },
-  hk: {
-    flagship: [
-      { school:'香港大学', major:'Master of Finance', rank:'QS 亚洲第2 / 世界第17', flag:'🇭🇰', badge:'港三之首' },
-      { school:'香港中文大学', major:'MSc Computer Science', rank:'QS 亚洲第4 / 世界第36', flag:'🇭🇰', badge:'港三之首' },
-      { school:'香港科技大学', major:'MSc Business Analytics', rank:'QS 亚洲第5 / 世界第47', flag:'🇭🇰', badge:'科技王牌' },
-      { school:'香港理工大学', major:'MSc Accounting', rank:'QS 亚洲第21', flag:'🇭🇰', badge:'商科劲旅' },
-      { school:'香港城市大学', major:'MSc Data Science', rank:'QS 亚洲第23', flag:'🇭🇰', badge:'新晋名校' },
-    ],
-    backup: [
-      { school:'香港岭南大学', major:'MA International Business', rank:'港八大之一', flag:'🇭🇰', badge:'保底' },
-      { school:'香港浸会大学', major:'MA Communications', rank:'传媒名校', flag:'🇭🇰', badge:'保底' },
-    ]
-  },
-  au: {
-    flagship: [
-      { school:'澳大利亚国立大学', major:'Master of Computing', rank:'QS 世界第30', flag:'🇦🇺', badge:'澳洲第一' },
-      { school:'墨尔本大学', major:'Master of Management', rank:'QS 世界第33', flag:'🇦🇺', badge:'澳洲八大' },
-      { school:'悉尼大学', major:'Master of Commerce', rank:'QS 世界第41', flag:'🇦🇺', badge:'澳洲八大' },
-      { school:'新南威尔士大学', major:'MSc Financial Technology', rank:'QS 世界第45', flag:'🇦🇺', badge:'工程强校' },
-      { school:'昆士兰大学', major:'Master of Tourism Management', rank:'QS 世界第50', flag:'🇦🇺', badge:'旅游王牌' },
-      { school:'蒙纳士大学', major:'MSc Data Science', rank:'QS 世界第57', flag:'🇦🇺', badge:'药学领先' },
-    ],
-    backup: [
-      { school:'悉尼科技大学', major:'Master of Information Technology', rank:'澳洲年轻大学TOP1', flag:'🇦🇺', badge:'保底' },
-      { school:'皇家墨尔本理工大学', major:'Master of Design', rank:'设计强校', flag:'🇦🇺', badge:'保底' },
-    ]
-  },
-  sg: {
-    flagship: [
-      { school:'新加坡国立大学', major:'Master of Computing', rank:'QS 世界第8 / 亚洲第1', flag:'🇸🇬', badge:'亚洲天花板' },
-      { school:'南洋理工大学', major:'MSc Data Science', rank:'QS 世界第15 / 亚洲第3', flag:'🇸🇬', badge:'科研强校' },
-      { school:'新加坡管理大学', major:'Master of Professional Accounting', rank:'商科精英', flag:'🇸🇬', badge:'商科精品' },
-    ],
-    backup: [
-      { school:'新加坡理工学院', major:'Advanced Diploma', rank:'新加坡公立院校', flag:'🇸🇬', badge:'保底' },
-    ]
-  }
+// 综合院校池（各国混排，按档次分层）
+const SCHOOL_TIERS = {
+  // 顶级档：手气3
+  top: [
+    { school:'帝国理工学院', flag:'🇬🇧', rank:'QS 世界第6', country:'uk',
+      majors:['MSc Management','MSc Finance','MSc Data Science','MSc Artificial Intelligence'] },
+    { school:'新加坡国立大学', flag:'🇸🇬', rank:'QS 世界第8 / 亚洲第1', country:'sg',
+      majors:['Master of Computing','MSc Data Science','MSc Finance','Master of Public Policy'] },
+    { school:'伦敦大学学院', flag:'🇬🇧', rank:'QS 世界第9', country:'uk',
+      majors:['MSc Computer Science','MSc Finance','MA Education','MSc Data Science'] },
+    { school:'香港大学', flag:'🇭🇰', rank:'QS 世界第17 / 亚洲第2', country:'hk',
+      majors:['Master of Finance','MSc Computer Science','MA Applied Linguistics','MSc Business Analytics'] },
+    { school:'爱丁堡大学', flag:'🇬🇧', rank:'QS 世界第22', country:'uk',
+      majors:['MSc Artificial Intelligence','MSc Finance','MSc Data Science','MA Film Directing'] },
+    { school:'南洋理工大学', flag:'🇸🇬', rank:'QS 世界第15 / 亚洲第3', country:'sg',
+      majors:['MSc Data Science','MSc Finance','MSc Marketing','MSc Computer Control'] },
+    { school:'墨尔本大学', flag:'🇦🇺', rank:'QS 世界第33 / 澳洲第1', country:'au',
+      majors:['Master of Management','Master of Finance','MSc Information Technology','MA Education'] },
+    { school:'悉尼大学', flag:'🇦🇺', rank:'QS 世界第41 / 澳洲第2', country:'au',
+      majors:['Master of Commerce','MSc Data Science','Master of Media Practice','MSc Project Management'] },
+  ],
+  // 中高档：手气2
+  mid: [
+    { school:'曼彻斯特大学', flag:'🇬🇧', rank:'QS 世界第34', country:'uk',
+      majors:['MSc Finance','MSc Marketing','MSc Data Science','MSc Management'] },
+    { school:'伦敦国王学院', flag:'🇬🇧', rank:'QS 世界第40', country:'uk',
+      majors:['MA Education','MSc Data Science','MSc International Management','MSc Computer Science'] },
+    { school:'香港中文大学', flag:'🇭🇰', rank:'QS 世界第36 / 亚洲第4', country:'hk',
+      majors:['MSc Computer Science','MSc Finance','MA English Literature','MSc Business Analytics'] },
+    { school:'香港科技大学', flag:'🇭🇰', rank:'QS 世界第47 / 亚洲第5', country:'hk',
+      majors:['MSc Business Analytics','MSc Financial Technology','MSc Information Systems','MSc Economics'] },
+    { school:'新南威尔士大学', flag:'🇦🇺', rank:'QS 世界第45 / 澳洲第4', country:'au',
+      majors:['MSc Financial Technology','MSc Information Technology','MSc Marketing','MSc Engineering'] },
+    { school:'昆士兰大学', flag:'🇦🇺', rank:'QS 世界第50 / 澳洲第5', country:'au',
+      majors:['Master of Tourism Management','MSc Data Science','MSc Business','MA International Relations'] },
+    { school:'华威大学', flag:'🇬🇧', rank:'QS 世界第67', country:'uk',
+      majors:['MSc Business Analytics','MSc Management','MSc Finance','MSc Marketing'] },
+    { school:'布里斯托大学', flag:'🇬🇧', rank:'QS 世界第54', country:'uk',
+      majors:['MSc Data Science','MSc Computer Science','MSc Marketing','MSc Engineering'] },
+  ],
+  // 普通档：手气1
+  normal: [
+    { school:'格拉斯哥大学', flag:'🇬🇧', rank:'QS 世界第78', country:'uk',
+      majors:['MSc Software Engineering','MSc Finance','MSc Marketing','MSc Media Management'] },
+    { school:'谢菲尔德大学', flag:'🇬🇧', rank:'QS 世界前100', country:'uk',
+      majors:['MA Media and Communication','MSc Project Management','MSc Finance','MA Education'] },
+    { school:'伯明翰大学', flag:'🇬🇧', rank:'QS 世界前100', country:'uk',
+      majors:['MSc Marketing','MSc Management','MSc Data Science','MSc Accounting'] },
+    { school:'香港城市大学', flag:'🇭🇰', rank:'QS 亚洲第23', country:'hk',
+      majors:['MSc Data Science','MSc Accounting','MSc Media Culture','MSc Information Systems'] },
+    { school:'香港理工大学', flag:'🇭🇰', rank:'QS 亚洲第21', country:'hk',
+      majors:['MSc Accounting','MSc Data Science','MSc Engineering','MSc Global Hospitality'] },
+    { school:'利兹大学', flag:'🇬🇧', rank:'QS 世界前100', country:'uk',
+      majors:['MSc Fashion Management','MSc Data Science','MSc Marketing','MSc Finance'] },
+    { school:'蒙纳士大学', flag:'🇦🇺', rank:'QS 世界第57 / 澳洲第5', country:'au',
+      majors:['MSc Data Science','Master of Accounting','MSc Education','MSc Engineering'] },
+    { school:'澳大利亚国立大学', flag:'🇦🇺', rank:'QS 世界第30 / 澳洲第1', country:'au',
+      majors:['Master of Computing','MSc Finance','MSc Data Science','MA International Relations'] },
+  ],
+  // 保底档：手气0
+  safe: [
+    { school:'谢菲尔德大学', flag:'🇬🇧', rank:'QS 世界前100', country:'uk',
+      majors:['MA Media and Communication','MSc Project Management','MSc Management'] },
+    { school:'伯明翰大学', flag:'🇬🇧', rank:'QS 世界前100', country:'uk',
+      majors:['MSc Marketing','MSc Management','MSc Accounting'] },
+    { school:'利兹大学', flag:'🇬🇧', rank:'QS 世界前100', country:'uk',
+      majors:['MSc Fashion Management','MSc Marketing','MSc Finance'] },
+    { school:'香港岭南大学', flag:'🇭🇰', rank:'港八大之一', country:'hk',
+      majors:['MA International Business','MSc Finance','MA Chinese Literature'] },
+    { school:'香港浸会大学', flag:'🇭🇰', rank:'传媒名校', country:'hk',
+      majors:['MA Communications','MSc Data Analytics','MA Chinese Literature'] },
+    { school:'悉尼科技大学', flag:'🇦🇺', rank:'澳洲年轻大学 TOP1', country:'au',
+      majors:['Master of Information Technology','Master of Design','MSc Data Science'] },
+    { school:'皇家墨尔本理工大学', flag:'🇦🇺', rank:'设计强校', country:'au',
+      majors:['Master of Design','Master of Fashion','MSc Property'] },
+    { school:'新加坡理工学院', flag:'🇸🇬', rank:'新加坡公立院校', country:'sg',
+      majors:['Advanced Diploma in Business','Advanced Diploma in IT','Advanced Diploma in Design'] },
+  ]
 };
 
+// 娱乐评语
+const RESULT_COMMENTS = {
+  3: [
+    '欧皇本皇！这是老天爷追着喂饭吃啊！',
+    '开挂了吧你？这运气我都馋了 😍',
+    '天命之子！你的申请之路已经赢在起跑线！',
+    '吸吸欧气！下一个欧皇就是你！',
+  ],
+  2: [
+    '手气不错！稳稳能申到好学校！',
+    '运气挺好，再加把劲就是天花板！',
+    '不错不错，继续冲！',
+  ],
+  1: [
+    '稳扎稳打，每一步都算数！',
+    '脚踏实地，也能走到远方 ✨',
+    '普通人的逆袭之路，点赞！',
+  ],
+  0: [
+    '保守也是一种智慧，先拿到 Offer 再说！',
+    '保底稳如老狗，先上车再换座！',
+    '不急不躁，offer 在路上 🚗',
+  ]
+};
+
+const BADGES_BY_TIER = {
+  3: ['🌟 天选之人', '🎰 欧皇附体'],
+  2: ['🍀 运气不错', '🚀 潜力选手'],
+  1: ['📚 稳扎稳打', '💪 步步为营'],
+  0: ['🛡️ 稳健型', '🎯 务实派'],
+};
+
+// 3道趣味答题
 const QUIZ_QUESTIONS = [
   {
-    q: '推荐信老师最可能用哪个词形容你？',
+    q: '你是什么类型的选手？',
     opts: [
-      { text: '逻辑清晰，执行力强', pts: 2 },
-      { text: '富有创意，点子多', pts: 1 },
-      { text: '善于沟通，人缘好', pts: 1 },
-      { text: '沉稳可靠，值得托付', pts: 2 },
+      { text: '🌟 天选之子，走路都能捡到钱', pts: 3 },
+      { text: '🍀 运气还行，偶尔小惊喜', pts: 2 },
+      { text: '📚 普通选手，靠实力说话', pts: 1 },
+      { text: '🛡️ 稳字当头，从不冒险', pts: 0 },
     ]
   },
   {
-    q: '如果留学期间收到拒信，你的反应是？',
+    q: '抽卡时你最常用什么姿势？',
     opts: [
-      { text: '深呼吸，分析原因立刻调整策略', pts: 3 },
-      { text: '哭一场，然后马上找备选方案', pts: 2 },
-      { text: '找朋友倾诉，寻求安慰', pts: 1 },
-      { text: '怀疑人生，但还是要面对', pts: 1 },
+      { text: '十连抽！保底算什么，我要的是奇迹', pts: 3 },
+      { text: '单抽！直觉告诉我现在就是最好的时机', pts: 2 },
+      { text: '等UP池，分析完概率再下手', pts: 1 },
+      { text: '保底抽卡，稳定压倒一切', pts: 0 },
     ]
   },
   {
-    q: '你最希望留学给你带来什么？',
+    q: '你最相信什么？',
     opts: [
-      { text: '顶尖人脉和职业跳板', pts: 3 },
-      { text: '独立生活的能力', pts: 2 },
-      { text: '开阔的眼界和体验', pts: 1 },
-      { text: '一张漂亮的文凭', pts: 1 },
+      { text: '相信玄学！许愿池才是我的力量源泉', pts: 3 },
+      { text: '相信自己，实力才是硬道理', pts: 2 },
+      { text: '相信努力，运气只是加成', pts: 1 },
+      { text: '相信命运，一切都是最好的安排', pts: 0 },
     ]
   },
-  {
-    q: '凌晨两点，论文deadline还有三小时，你会？',
-    opts: [
-      { text: '已经写完了，开始润色', pts: 3 },
-      { text: '喝杯咖啡全力冲刺', pts: 2 },
-      { text: '先睡一会儿，效率更高', pts: 1 },
-      { text: '发消息问同学写到哪了', pts: 0 },
-    ]
-  },
-  {
-    q: '你最想成为哪种类型的留学生？',
-    opts: [
-      { text: '学术型：发论文、做研究', pts: 2 },
-      { text: '社交型：链接各路人脉', pts: 1 },
-      { text: '实战型：疯狂刷实习', pts: 3 },
-      { text: '体验型：环游世界', pts: 0 },
-    ]
-  },
-];
-
-const TIPS = [
-  '英国申请竞争激烈，建议提前一年开始准备，你的背景很有竞争力！',
-  '香港学校看重本科院校排名和GPA，你的条件申请港前三很有希望。',
-  '澳洲申请相对宽松，但好专业竞争也不小，早申早得是王道。',
-  '新加坡两所顶尖大学对学术成绩要求很高，但你的潜力值得一试！',
-  '商科申请建议带上GMAT/GRE，700+会大大增加竞争力。',
-  '理工科方向建议补充科研经历或相关实习，学术背景更立体。',
 ];
 
 /* ============================================
@@ -892,15 +882,12 @@ const TIPS = [
 ============================================ */
 
 let gameState = {
-  power: 0,          // 实力值
-  currentQ: 0,       // 当前题目index
-  gpa: '',           // 成绩
-  lang: '',          // 语言
-  countries: [],     // 意向国家列表
-  major: '',         // 专业
-  phone: '',         // 手机号（留空=跳过）
-  mainOffer: null,   // 主录取
-  subOffers: [],     // 保底录取
+  countries: [],
+  luckBase: 0,     // 基础手气（表单选择）
+  luckQuiz: 0,     // 答题加的手气
+  currentQ: 0,
+  mainOffer: null,
+  subOffers: [],
 };
 
 /* ============================================
@@ -917,7 +904,6 @@ let gameState = {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
   }
-
   function createParticle() {
     return {
       x: Math.random() * canvas.width,
@@ -929,12 +915,10 @@ let gameState = {
       color: ['#a855f7','#3b82f6','#fbbf24','#ec4899'][Math.floor(Math.random()*4)]
     };
   }
-
   function init() {
     particles = [];
     for (let i = 0; i < 60; i++) particles.push(createParticle());
   }
-
   function draw() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     particles.forEach(p => {
@@ -951,10 +935,7 @@ let gameState = {
     ctx.globalAlpha = 1;
     animId = requestAnimationFrame(draw);
   }
-
-  resize();
-  init();
-  draw();
+  resize(); init(); draw();
   window.addEventListener('resize', () => { resize(); init(); });
 })();
 
@@ -979,7 +960,7 @@ function updateProgress(step, total) {
 }
 
 /* ============================================
-   LOGIN SCREEN
+   LOGIN SCREEN — 模拟一键登录，明确标注即将上线
 ============================================ */
 
 function goLogin() {
@@ -987,31 +968,37 @@ function goLogin() {
 }
 
 function simulateLogin() {
-  // 模拟一键登录，实际项目需接入微信 getPhoneNumber
-  const mockPhones = ['138****1234', '159****8765', '136****5432'];
-  gameState.phone = mockPhones[Math.floor(Math.random() * mockPhones.length)];
-  showScreen('screen-form');
-  updateProgress(1, 5);
+  // 模拟登录效果，但不实际收集
+  const mockPhones = ['138****1234', '159****8765', '136****5432', '182****9527', '159****3381'];
+  const phone = mockPhones[Math.floor(Math.random() * mockPhones.length)];
+  document.getElementById('mock-phone-hint').innerHTML =
+    '✅ 已获取：' + phone + ' <span style="color:#64748b;font-size:11px">（演示账号）</span>';
+  setTimeout(() => {
+    goForm();
+  }, 1200);
 }
 
 function skipLogin() {
-  gameState.phone = '';
+  document.getElementById('mock-phone-hint').textContent = '';
+  goForm();
+}
+
+function goForm() {
   showScreen('screen-form');
-  updateProgress(1, 5);
+  updateProgress(1, 4);
 }
 
 /* ============================================
-   FORM LOGIC
+   FORM LOGIC — 纯娱乐，手气决定院校档次
 ============================================ */
 
 function setupRadioGroup(groupId, key) {
   const group = document.getElementById(groupId);
   group.querySelectorAll('.radio-item').forEach(item => {
     item.addEventListener('click', () => {
-      // 单选：取消其他选中
       group.querySelectorAll('.radio-item').forEach(i => i.classList.remove('selected'));
       item.classList.add('selected');
-      gameState[key] = item.dataset.val;
+      gameState[key] = parseInt(item.dataset.val);
     });
   });
 }
@@ -1021,37 +1008,22 @@ function setupCountryGroup() {
   group.querySelectorAll('.country-item').forEach(item => {
     item.addEventListener('click', () => {
       item.classList.toggle('selected');
-      // 至少选一个
       const selected = [...group.querySelectorAll('.country-item.selected')];
-      if (selected.length === 0) {
-        item.classList.add('selected');
-      }
-      gameState.countries = selected.map(i => i.dataset.val);
+      if (selected.length === 0) { item.classList.add('selected'); }
+      gameState.countries = [...group.querySelectorAll('.country-item.selected')]
+        .map(i => ({ val: i.dataset.val, flag: i.dataset.flag }));
     });
   });
 }
 
 function submitForm() {
-  // 验证必填
-  if (!gameState.gpa || !gameState.lang) {
-    alert('请先完成成绩和语言选项');
-    return;
-  }
-  gameState.countries = [...document.querySelectorAll('#country-group .country-item.selected')]
-    .map(i => i.dataset.val);
+  // 至少选一个国家
   if (gameState.countries.length === 0) {
-    alert('请至少选择一个意向国家');
+    alert('请至少选择一个意向国家哦~');
     return;
   }
-  gameState.major = document.getElementById('major-select').value;
-
-  // 初始化实力值
-  const gpaPts = { '3.8+': 3, '3.5+': 2, '3.0+': 1, '2.5': 0 };
-  const langPts = { '7.5+': 3, '7.0': 2, '6.5': 1, '6.0': 0 };
-  gameState.power = (gpaPts[gameState.gpa] || 0) + (langPts[gameState.lang] || 0);
-  // 随机加一点
-  gameState.power += Math.floor(Math.random() * 3);
-
+  // 基础手气
+  gameState.luckBase = gameState.luckBase || 1;
   startQuiz();
 }
 
@@ -1061,9 +1033,9 @@ function submitForm() {
 
 function startQuiz() {
   gameState.currentQ = 0;
-  gameState.quizPower = gameState.power; // 用quizPower显示当前实力
+  gameState.luckQuiz = 0;
   showScreen('screen-quiz');
-  updateProgress(2, 5);
+  updateProgress(2, 4);
   renderQuestion();
 }
 
@@ -1072,9 +1044,10 @@ function renderQuestion() {
   document.getElementById('quiz-q-num').textContent =
     `第 ${gameState.currentQ + 1} 题 / 共 ${QUIZ_QUESTIONS.length} 题`;
   document.getElementById('quiz-question').textContent = q.q;
-  document.getElementById('power-val').textContent = gameState.quizPower;
-  const pct = Math.min(gameState.quizPower / 15 * 100, 100);
-  document.getElementById('power-fill').style.width = pct + '%';
+  document.getElementById('luck-val').textContent = gameState.luckQuiz;
+  const maxPts = QUIZ_QUESTIONS.reduce((s, qu) => s + Math.max(...qu.opts.map(o => o.pts)), 0);
+  const pct = Math.min(gameState.luckQuiz / maxPts * 100, 100);
+  document.getElementById('luck-fill').style.width = pct + '%';
 
   const container = document.getElementById('quiz-options');
   container.innerHTML = '';
@@ -1089,104 +1062,76 @@ function renderQuestion() {
 }
 
 function selectOption(idx, pts) {
-  // 高亮选中
   document.querySelectorAll('.quiz-option').forEach((o, i) => {
     o.classList.remove('selected');
     if (i === idx) o.classList.add('selected');
   });
-
-  gameState.quizPower += pts;
+  gameState.luckQuiz += pts;
   gameState.currentQ++;
-
   setTimeout(() => {
     if (gameState.currentQ < QUIZ_QUESTIONS.length) {
       renderQuestion();
-      updateProgress(2 + gameState.currentQ, 5);
+      updateProgress(2 + gameState.currentQ, 4);
     } else {
-      // 答题结束，计入总实力值
-      gameState.power = gameState.quizPower;
       startUnbox();
     }
-  }, 500);
+  }, 400);
 }
 
 /* ============================================
-   UNBOXING LOGIC
+   UNBOXING — 纯随机，手气影响档次
 ============================================ */
 
 function startUnbox() {
   showScreen('screen-unbox');
-  updateProgress(4, 5);
+  updateProgress(3, 4);
   document.getElementById('unbox-next-btn').style.display = 'none';
 
-  // 计算 Offer
-  computeOffers();
+  // 计算总手气
+  const totalLuck = gameState.luckBase + gameState.luckQuiz;
+  let tier;
+  if (totalLuck >= 5) tier = 'top';
+  else if (totalLuck >= 3) tier = 'mid';
+  else if (totalLuck >= 1) tier = 'normal';
+  else tier = 'safe';
+
+  gameState.tier = tier;
+  gameState.tierLevel = totalLuck;
 
   const unboxTexts = ['🎰 命运齿轮转动中...', '✨ 魔法正在发生...', '📮 你的信封即将开启...'];
   let tIdx = 0;
   const textEl = document.getElementById('unbox-text');
-
   const textTimer = setInterval(() => {
     tIdx = (tIdx + 1) % unboxTexts.length;
     textEl.textContent = unboxTexts[tIdx];
   }, 800);
 
-  // 3秒后开箱
   setTimeout(() => {
     clearInterval(textTimer);
     textEl.textContent = '🎉 你的 Offer 来啦！';
-    document.getElementById('unbox-text').style.color = '#fbbf24';
+    textEl.style.color = '#fbbf24';
 
-    // 填充 Offer 数据
-    const o = gameState.mainOffer;
-    document.getElementById('offer-flag').textContent = o.flag;
-    document.getElementById('offer-school').textContent = o.school;
-    document.getElementById('offer-major').textContent = o.major;
-    document.getElementById('offer-rank').textContent = o.rank;
-    document.getElementById('offer-badge').textContent = '🎉 ' + o.badge;
+    // 随机选学校
+    const pool = SCHOOL_TIERS[tier];
+    const school = pool[Math.floor(Math.random() * pool.length)];
+    const major = school.majors[Math.floor(Math.random() * school.majors.length)];
 
-    // 翻转动画
+    gameState.mainOffer = { ...school, major };
+
+    document.getElementById('offer-flag').textContent = school.flag;
+    document.getElementById('offer-school').textContent = school.school;
+    document.getElementById('offer-major').textContent = major;
+    document.getElementById('offer-rank').textContent = school.rank;
+
+    const badgeTexts = BADGES_BY_TIER[gameState.luckBase] || BADGES_BY_TIER[1];
+    document.getElementById('offer-badge').textContent = '🎉 ' + badgeTexts[0];
+
     setTimeout(() => {
       document.getElementById('offer-card').classList.add('revealed');
       document.getElementById('unbox-next-btn').style.display = 'block';
-      updateProgress(5, 5);
+      updateProgress(4, 4);
     }, 300);
-  }, 3000);
-}
-
-function computeOffers() {
-  const countries = gameState.countries;
-  const power = gameState.power;
-  // 实力分段
-  // 15+: flagship[0-1], 10-14: flagship[2-4], 5-9: flagship[5-], <5: flagship last or backup
-  let tier, backupCount;
-  if (power >= 15) { tier = 0; backupCount = 1; }
-  else if (power >= 12) { tier = 1; backupCount = 1; }
-  else if (power >= 9) { tier = 2; backupCount = 1; }
-  else if (power >= 6) { tier = 4; backupCount = 2; }
-  else { tier = 6; backupCount = 2; }
-
-  // 从第一个国家取主offer，其他国家取backup
-  const mainCountry = countries[0];
-  const pool = SCHOOLS[mainCountry] || SCHOOLS.uk;
-  const flagship = pool.flagship;
-  const mainIdx = Math.min(tier, flagship.length - 1);
-  gameState.mainOffer = flagship[mainIdx];
-
-  // 保底offer：优先从其他国家取
-  const subOffers = [];
-  for (let i = 1; i < countries.length && subOffers.length < backupCount; i++) {
-    const c = countries[i];
-    const p = SCHOOLS[c] || SCHOOLS.uk;
-    subOffers.push(p.backup[Math.floor(Math.random() * p.backup.length)]);
-  }
-  // 如果还不够，从同国家取
-  while (subOffers.length < backupCount) {
-    const extras = pool.backup.filter(b => !subOffers.find(s => s.school === b.school));
-    if (extras.length > 0) subOffers.push(extras[Math.floor(Math.random() * extras.length)]);
-    else break;
-  }
-  gameState.subOffers = subOffers;
+  }, 2800);
 }
 
 /* ============================================
@@ -1195,7 +1140,7 @@ function computeOffers() {
 
 function showResult() {
   showScreen('screen-result');
-  updateProgress(5, 5);
+  updateProgress(4, 4);
 
   const o = gameState.mainOffer;
   document.getElementById('res-flag').textContent = o.flag;
@@ -1204,40 +1149,52 @@ function showResult() {
   document.getElementById('res-rank').textContent = o.rank;
 
   // 标签
+  const base = gameState.luckBase;
+  const badgeTexts = BADGES_BY_TIER[base] || BADGES_BY_TIER[1];
   const badgesEl = document.getElementById('res-badges');
-  const badgeList = ['主录取'];
-  if (gameState.power >= 12) badgeList.push('冲刺院校');
-  if (gameState.power < 8) badgeList.push('适合当前背景');
-  badgesEl.innerHTML = badgeList.map(b =>
-    `<span class="badge-pill">${b}</span>`
-  ).join('');
+  badgesEl.innerHTML = badgeTexts.map(b => `<span class="badge-pill">${b}</span>`).join('');
 
-  // 保底学校
+  // 随机评语
+  const comments = RESULT_COMMENTS[base] || RESULT_COMMENTS[1];
+  document.getElementById('res-tip').textContent = comments[Math.floor(Math.random() * comments.length)];
+
+  // 生成保底 offer（随机1-2个，排除主offer）
   const subEl = document.getElementById('res-sub-cards');
-  subEl.innerHTML = gameState.subOffers.map(o => `
+  const allSafe = SCHOOL_TIERS.safe;
+  const subs = [];
+  const used = [o.school];
+  while (subs.length < 2) {
+    const s = allSafe[Math.floor(Math.random() * allSafe.length)];
+    if (!used.includes(s.school)) {
+      used.push(s.school);
+      const m = s.majors[Math.floor(Math.random() * s.majors.length)];
+      subs.push({ ...s, major: m });
+    }
+    if (subs.length >= 2) break;
+  }
+  gameState.subOffers = subs;
+  subEl.innerHTML = subs.map(s => `
     <div class="sub-card">
-      <span class="sc-flag">${o.flag}</span>
-      <div class="sc-info">
-        <div class="sc-school">${o.school}</div>
-        <div class="sc-major">${o.major}</div>
+      <span class="sc-flag">${s.flag}</span>
+      <div>
+        <div class="sc-school">${s.school}</div>
+        <div class="sc-major">${s.major}</div>
       </div>
-      <span class="sc-tag">${o.badge}</span>
+      <span class="sc-tag">🎁 惊喜保底</span>
     </div>
   `).join('');
-
-  // Emma tip
-  const tipIdx = (gameState.power + gameState.gpa.length) % TIPS.length;
-  document.getElementById('res-tip').textContent = TIPS[tipIdx];
 }
 
 function shareResult() {
-  const text = `🎓 我的留学 Offer 是 ${gameState.mainOffer.school} ${gameState.mainOffer.major}！\n想知道你的 Offer 是什么吗？快来测试 →`;
+  const o = gameState.mainOffer;
+  const base = gameState.luckBase;
+  const tierEmoji = { 3: '🌟', 2: '🍀', 1: '📚', 0: '🛡️' }[base] || '🎲';
+  const text = `${tierEmoji} 我的留学 Offer ${o.flag} ${o.school} ${o.major}\n${o.rank}\n\n你的手气如何？快来试试 →`;
   if (navigator.share) {
-    navigator.share({ title: 'Offer 开箱', text });
+    navigator.share({ title: '🎓 Offer 开箱', text });
   } else {
-    // 复制到剪贴板
     navigator.clipboard.writeText(text).then(() => {
-      alert('已复制到剪贴板，快去分享给朋友吧！');
+      alert('已复制到剪贴板，快去炫耀你的欧气！');
     });
   }
 }
@@ -1246,14 +1203,20 @@ function shareResult() {
    INIT
 ============================================ */
 
-setupRadioGroup('gpa-group', 'gpa');
-setupRadioGroup('lang-group', 'lang');
+setupRadioGroup('luck-group', 'luckBase');
 setupCountryGroup();
 
+// 默认值
+gameState.luckBase = 2;
+gameState.countries = [
+  { val:'uk', flag:'🇬🇧' },
+  { val:'hk', flag:'🇭🇰' },
+];
 // 默认选中
-gameState.gpa = '3.5+';
-gameState.lang = '6.5';
-gameState.countries = ['uk', 'hk', 'au', 'sg'];
+document.querySelector('#luck-group .radio-item[data-val="2"]')?.classList.add('selected');
+document.querySelectorAll('#country-group .country-item').forEach(i => {
+  if (['uk','hk'].includes(i.dataset.val)) i.classList.add('selected');
+});
 </script>
 </body>
 </html>
