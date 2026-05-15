@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Offer 开箱模拟器</title>
+  <style>
+    /* ============================================
+       RESET & BASE
+    ============================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%;
+      font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+      background: #0a0a1a;
+      color: #fff;
+      overflow: hidden;
+      touch-action: manipulation;
+    }
+
+    /* ============================================
+       PARTICLES BACKGROUND
+    ============================================ */
+    #particles-canvas {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 0; pointer-events: none;
+    }
+
+    /* ============================================
+       SCREEN WRAPPER
+    ============================================ */
+    .screen {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 100%;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      z-index: 10;
+      padding: 24px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .screen.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ============================================
+       GLOBAL ELEMENTS
+    ============================================ */
+    .neon-title {
+      font-size: clamp(28px, 7vw, 48px);
+      font-weight: 900;
+      text-align: center;
+      letter-spacing: 2px;
+      line-height: 1.2;
+    }
+    .neon-title .accent {
+      background: linear-gradient(135deg, #a855f7, #3b82f6, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .neon-sub {
+      font-size: 15px;
+      color: #94a3b8;
+      text-align: center;
+      margin-top: 12px;
+      line-height: 1.6;
+    }
+
+    .btn-primary {
+      position: relative;
+      padding: 16px 40px;
+      border: none;
+      border-radius: 50px;
+      font-size: 17px;
+      font-weight: 700;
+      color: #fff;
+      cursor: pointer;
+      overflow: hidden;
+      margin-top: 32px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      box-shadow: 0 0 30px rgba(168, 85, 247, 0.4), 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.2s, box-shadow 0.2s;
+      letter-spacing: 1px;
+    }
+    .btn-primary:active { transform: scale(0.97); }
+    .btn-primary::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.15));
+      border-radius: inherit;
+    }
+
+    .progress-bar-wrap {
+      position: fixed; top: 0; left: 0;
+      width: 100%; height: 4px;
+      background: rgba(255,255,255,0.1);
+      z-index: 100;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #a855f7, #3b82f6);
+      transition: width 0.4s ease;
+      box-shadow: 0 0 8px #a855f7;
+    }
+
+    .step-indicator {
+      position: fixed;
+      top: 16px; right: 16px;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      z-index: 100;
+    }
+
+    /* ============================================
+       SCREEN 1: INTRO
+    ============================================ */
+    #screen-intro { gap: 0; justify-content: center; }
+    .intro-envelope {
+      width: 120px; height: 90px;
+      margin-bottom: 24px;
+      position: relative;
+      animation: float 3s ease-in-out infinite;
+    }
+    .intro-envelope .envelope-body {
+      width: 100%; height: 70px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 8px 8px 12px 12px;
+      position: absolute; bottom: 0;
+      box-shadow: 0 0 30px rgba(251, 191, 36, 0.3);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .intro-envelope .envelope-flap {
+      width: 0; height: 0;
+      border-left: 60px solid transparent;
+      border-right: 60px solid transparent;
+      border-bottom: 45px solid #f59e0b;
+      position: absolute; top: 0; left: 0;
+    }
+    .intro-envelope .envelope-star {
+      font-size: 32px;
+      position: relative; z-index: 2;
+      animation: spin-star 4s linear infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+    @keyframes spin-star {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    /* ============================================
+       SCREEN 2: FORM
+    ============================================ */
+    #screen-form { justify-content: flex-start; padding-top: 60px; }
+    .form-card {
+      width: 100%; max-width: 420px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 20px;
+      padding: 28px 24px;
+      margin-top: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .form-group { margin-bottom: 20px; }
+    .form-label {
+      font-size: 13px;
+      color: #a855f7;
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+      letter-spacing: 0.5px;
+    }
+    .form-select, .form-input {
+      width: 100%;
+      padding: 12px 16px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .form-select:focus, .form-input:focus {
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.15);
+    }
+    .form-select option { background: #1a1a2e; color: #fff; }
+    .radio-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .radio-item {
+      padding: 10px 12px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 10px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.2s;
+      color: #cbd5e1;
+    }
+    .radio-item.selected {
+      background: rgba(168, 85, 247, 0.2);
+      border-color: #a855f7;
+      color: #e9d5ff;
+    }
+
+    /* ============================================
+       SCREEN 3: QUIZ
+    ============================================ */
+    #screen-quiz { justify-content: flex-start; padding-top: 60px; }
+    .quiz-card {
+      width: 100%; max-width: 420px;
+      text-align: center;
+    }
+    .quiz-q-num {
+      font-size: 12px;
+      color: #a855f7;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .quiz-question {
+      font-size: clamp(16px, 4vw, 20px);
+      font-weight: 700;
+      color: #f1f5f9;
+      line-height: 1.5;
+      margin-bottom: 28px;
+    }
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+    .quiz-option {
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px;
+      font-size: 14px;
+      color: #cbd5e1;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+      line-height: 1.5;
+    }
+    .quiz-option:hover, .quiz-option:active {
+      background: rgba(168, 85, 247, 0.15);
+      border-color: rgba(168, 85, 247, 0.5);
+      color: #e9d5ff;
+    }
+    .quiz-option .opt-icon {
+      display: inline-block;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      margin-right: 10px;
+      vertical-align: middle;
+      font-size: 11px;
+      text-align: center;
+      line-height: 18px;
+      transition: all 0.2s;
+    }
+    .quiz-option.selected {
+      background: rgba(59, 130, 246, 0.2);
+      border-color: #3b82f6;
+      color: #bfdbfe;
+    }
+    .quiz-option.selected .opt-icon {
+      background: #3b82f6;
+      border-color: #3b82f6;
+      color: #fff;
+    }
+
+    .power-bar-wrap {
+      width: 100%; max-width: 420px;
+      margin-top: 24px;
+    }
+    .power-label {
+      display: flex; justify-content: space-between;
+      font-size: 12px; color: #94a3b8;
+      margin-bottom: 6px;
+    }
+    .power-bar-bg {
+      height: 8px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .power-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #a855f7, #fbbf24);
+      border-radius: 4px;
+      transition: width 0.5s ease;
+    }
+
+    /* ============================================
+       SCREEN 4: UNBOXING
+    ============================================ */
+    #screen-unbox { justify-content: center; gap: 0; }
+    .unbox-container {
+      display: flex; flex-direction: column;
+      align-items: center;
+    }
+    .envelope-big {
+      width: 160px; height: 120px;
+      position: relative;
+      margin-bottom: 30px;
+    }
+    .envelope-big .e-body {
+      width: 100%; height: 90px;
+      background: linear-gradient(135deg, #fbbf24, #f59e0b);
+      border-radius: 10px 10px 16px 16px;
+      position: absolute; bottom: 0;
+      box-shadow: 0 0 40px rgba(251, 191, 36, 0.4);
+    }
+    .envelope-big .e-flap {
+      width: 0; height: 0;
+      border-left: 80px solid transparent;
+      border-right: 80px solid transparent;
+      border-bottom: 55px solid #f59e0b;
+      position: absolute; top: 0; left: 0;
+    }
+    .envelope-big .e-star {
+      font-size: 40px;
+      position: absolute; bottom: 22px; left: 50%;
+      transform: translateX(-50%);
+      animation: spin-star 3s linear infinite;
+    }
+
+    .unbox-text {
+      font-size: 18px;
+      color: #fbbf24;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .unbox-sub { font-size: 13px; color: #64748b; margin-bottom: 20px; }
+
+    .offer-card {
+      width: 280px;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 2px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transform: scale(0.7) rotateY(-180deg);
+      opacity: 0;
+      transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.5s;
+      box-shadow: 0 0 40px rgba(168, 85, 247, 0.3);
+    }
+    .offer-card.revealed {
+      transform: scale(1) rotateY(0deg);
+      opacity: 1;
+    }
+    .offer-card::before {
+      content: '';
+      position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(135deg, #a855f7, #3b82f6, #fbbf24);
+      border-radius: 22px;
+      z-index: -1;
+      opacity: 0.5;
+      filter: blur(4px);
+    }
+    .offer-country-flag {
+      font-size: 36px; margin-bottom: 10px;
+    }
+    .offer-school-name {
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .offer-major {
+      font-size: 14px;
+      color: #fbbf24;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .offer-rank {
+      font-size: 12px;
+      color: #94a3b8;
+    }
+    .offer-badge {
+      position: absolute; top: -8px; right: -8px;
+      background: #ef4444;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      transform: rotate(12deg);
+      box-shadow: 0 0 10px rgba(239,68,68,0.5);
+    }
+
+    /* ============================================
+       SCREEN 5: RESULT
+    ============================================ */
+    #screen-result { justify-content: flex-start; padding-top: 60px; overflow-y: auto; }
+    .result-container {
+      width: 100%; max-width: 420px;
+      display: flex; flex-direction: column;
+      align-items: center;
+      padding-bottom: 40px;
+    }
+    .result-header {
+      text-align: center; margin-bottom: 24px;
+    }
+    .result-main-card {
+      width: 100%;
+      background: linear-gradient(135deg, #1a1a2e, #16213e);
+      border: 2px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      padding: 28px 24px;
+      text-align: center;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+    .result-main-card::before {
+      content: '';
+      position: absolute; top: 0; left: 0; right: 0; height: 3px;
+      background: linear-gradient(90deg, #a855f7, #3b82f6, #fbbf24);
+    }
+    .result-flag { font-size: 48px; margin-bottom: 12px; }
+    .result-school {
+      font-size: 24px; font-weight: 900;
+      background: linear-gradient(135deg, #a855f7, #3b82f6);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 6px;
+    }
+    .result-major {
+      font-size: 15px; color: #fbbf24;
+      font-weight: 600; margin-bottom: 8px;
+    }
+    .result-rank {
+      font-size: 13px; color: #94a3b8; margin-bottom: 16px;
+    }
+    .result-badges {
+      display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;
+    }
+    .badge-pill {
+      padding: 4px 12px;
+      background: rgba(168, 85, 247, 0.15);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      font-size: 12px;
+      color: #c4b5fd;
+    }
+    .result-sub-cards {
+      width: 100%;
+      display: flex; flex-direction: column; gap: 10px;
+      margin-bottom: 20px;
+    }
+    .sub-card {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 14px 18px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    .sub-card .sc-flag { font-size: 24px; }
+    .sub-card .sc-info {}
+    .sc-school { font-size: 15px; font-weight: 700; color: #e2e8f0; }
+    .sc-major { font-size: 12px; color: #94a3b8; }
+    .sc-tag {
+      margin-left: auto;
+      font-size: 10px; padding: 3px 8px;
+      background: rgba(59, 130, 246, 0.15);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 10px;
+      color: #93c5fd;
+      white-space: nowrap;
+    }
+
+    .result-tip {
+      width: 100%;
+      background: rgba(251, 191, 36, 0.08);
+      border: 1px solid rgba(251, 191, 36, 0.2);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .result-tip-title {
+      font-size: 14px; font-weight: 700;
+      color: #fbbf24; margin-bottom: 6px;
+    }
+    .result-tip-body {
+      font-size: 13px; color: #94a3b8;
+      line-height: 1.6;
+    }
+
+    .result-cta {
+      width: 100%;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(59, 130, 246, 0.1));
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 20px;
+      padding: 24px 20px;
+      text-align: center;
+    }
+    .result-cta-title {
+      font-size: 16px; font-weight: 700;
+      color: #e9d5ff; margin-bottom: 8px;
+    }
+    .result-cta-sub {
+      font-size: 13px; color: #94a3b8;
+      margin-bottom: 16px; line-height: 1.6;
+    }
+    .cta-btn-emma {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none; border-radius: 50px;
+      color: #fff; font-size: 15px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+      transition: transform 0.2s, box-shadow 0.2s;
+      text-decoration: none;
+    }
+    .cta-btn-emma:active { transform: scale(0.97); }
+    .result-share {
+      margin-top: 14px;
+      font-size: 12px; color: #64748b;
+      cursor: pointer;
+    }
+
+    /* ============================================
+       PHONE LOGIN SCREEN
+    ============================================ */
+    #screen-login { justify-content: center; }
+    .login-card {
+      width: 100%; max-width: 360px;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(168, 85, 247, 0.2);
+      border-radius: 24px;
+      padding: 36px 28px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+    }
+    .login-icon { font-size: 48px; margin-bottom: 16px; }
+    .login-title {
+      font-size: 20px; font-weight: 800;
+      color: #f1f5f9; margin-bottom: 8px;
+    }
+    .login-sub { font-size: 13px; color: #94a3b8; margin-bottom: 24px; line-height: 1.6; }
+    .login-btn {
+      width: 100%;
+      padding: 16px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border: none; border-radius: 50px;
+      color: #fff; font-size: 16px; font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 25px rgba(168, 85, 247, 0.4);
+      margin-bottom: 12px;
+    }
+    .login-skip {
+      font-size: 12px; color: #64748b;
+      cursor: pointer; text-decoration: underline;
+    }
+    .login-note {
+      font-size: 11px; color: #475569;
+      margin-top: 16px; line-height: 1.5;
+    }
+
+    /* ============================================
+       GLOW / ANIMATION UTILS
+    ============================================ */
+    @keyframes pulse-glow {
+      0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.3); }
+      50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.6); }
+    }
+    .glow { animation: pulse-glow 2s ease-in-out infinite; }
+
+    /* ============================================
+       UTILITY
+    ============================================ */
+    .hidden { display: none !important; }
+    .fade-in { animation: fadeIn 0.5s ease forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Particles Background -->
+<canvas id="particles-canvas"></canvas>
+
+<!-- Progress Bar -->
+<div class="progress-bar-wrap" id="progress-wrap" style="display:none">
+  <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+</div>
+<div class="step-indicator" id="step-indicator" style="display:none"></div>
+
+<!-- SCREEN 1: INTRO -->
+<div class="screen active" id="screen-intro">
+  <div class="intro-envelope">
+    <div class="envelope-flap"></div>
+    <div class="envelope-body">
+      <div class="envelope-star">✦</div>
+    </div>
+  </div>
+  <h1 class="neon-title">
+    你的 <span class="accent">留学 Offer</span><br>会是什么？
+  </h1>
+  <p class="neon-sub">
+    通过趣味测试<br>揭晓你命中注定的名校 Offer
+  </p>
+  <button class="btn-primary glow" onclick="goLogin()">开始探索 →</button>
+</div>
+
+<!-- SCREEN 2: LOGIN -->
+<div class="screen" id="screen-login">
+  <div class="login-card">
+    <div class="login-icon">🎁</div>
+    <div class="login-title">解锁完整版 Offer 报告</div>
+    <div class="login-sub">填写手机号，领取属于你的<br>独家留学规划方案</div>
+    <button class="login-btn" onclick="simulateLogin()">📱 一键获取手机号登录</button>
+    <div class="login-skip" onclick="skipLogin()">跳过，直接体验游戏</div>
+    <div class="login-note">
+      登录后解锁：完整 Offer 报告 + 专属留学方案<br>
+      您的信息将被严格保密，仅用于留学咨询
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 3: FORM -->
+<div class="screen" id="screen-form">
+  <h2 class="neon-title" style="font-size:clamp(22px,5vw,30px);margin-bottom:4px">
+    先了解一下 <span class="accent">你</span>
+  </h2>
+  <p class="neon-sub" style="margin-bottom:0">填写基本信息，生成专属 Offer</p>
+  <div class="form-card">
+    <!-- GPA -->
+    <div class="form-group">
+      <label class="form-label">📊 你的成绩水平</label>
+      <div class="radio-group" id="gpa-group">
+        <div class="radio-item" data-val="3.8+">优秀 (85%+ / A)</div>
+        <div class="radio-item" data-val="3.5+">良好 (75-84% / B+)</div>
+        <div class="radio-item" data-val="3.0+">中等 (65-74% / B)</div>
+        <div class="radio-item" data-val="2.5">一般 (60-64% / C)</div>
+      </div>
+    </div>
+    <!-- Language -->
+    <div class="form-group">
+      <label class="form-label">🗣️ 语言成绩（雅思）</label>
+      <div class="radio-group" id="lang-group">
+        <div class="radio-item" data-val="7.5+">7.5 分以上</div>
+        <div class="radio-item" data-val="7.0">7.0 分</div>
+        <div class="radio-item" data-val="6.5">6.5 分</div>
+        <div class="radio-item" data-val="6.0">6.0 分以下 / 暂无</div>
+      </div>
+    </div>
+    <!-- Country -->
+    <div class="form-group">
+      <label class="form-label">🌏 意向留学国家（可多选）</label>
+      <div class="radio-group" id="country-group">
+        <div class="radio-item country-item selected" data-val="uk">🇬🇧 英国</div>
+        <div class="radio-item country-item selected" data-val="hk">🇭🇰 中国香港</div>
+        <div class="radio-item country-item selected" data-val="au">🇦🇺 澳大利亚</div>
+        <div class="radio-item country-item selected" data-val="sg">🇸🇬 新加坡</div>
+      </div>
+    </div>
+    <!-- Major -->
+    <div class="form-group">
+      <label class="form-label">🎯 意向专业方向</label>
+      <select class="form-select" id="major-select">
+        <option value="business">商科（金融、会计、管理）</option>
+        <option value="stem">理工科（计算机、工程、数据）</option>
+        <option value="arts">文科艺术（教育、传媒、设计）</option>
+        <option value="law">法学</option>
+        <option value="unknown">还没想好</option>
+      </select>
+    </div>
+    <button class="btn-primary" style="width:100%;text-align:center;margin-top:8px" onclick="submitForm()">
+      生成我的 Offer →
+    </button>
+  </div>
+</div>
+
+<!-- SCREEN 4: QUIZ -->
+<div class="screen" id="screen-quiz">
+  <div class="quiz-card">
+    <div class="quiz-q-num" id="quiz-q-num">第 1 题 / 共 5 题</div>
+    <div class="quiz-question" id="quiz-question"></div>
+    <div class="quiz-options" id="quiz-options"></div>
+  </div>
+  <div class="power-bar-wrap">
+    <div class="power-label">
+      <span>申请实力值</span>
+      <span id="power-val">0</span>
+    </div>
+    <div class="power-bar-bg">
+      <div class="power-bar-fill" id="power-fill" style="width:0%"></div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREEN 5: UNBOXING -->
+<div class="screen" id="screen-unbox">
+  <div class="unbox-container">
+    <div class="unbox-text" id="unbox-text">🎰 开启你的命运信封...</div>
+    <div class="unbox-sub">命运的齿轮开始转动</div>
+    <div class="envelope-big">
+      <div class="e-flap"></div>
+      <div class="e-body">
+        <div class="e-star">✦</div>
+      </div>
+    </div>
+    <div class="offer-card" id="offer-card">
+      <div class="offer-badge" id="offer-badge">🎉 主录取</div>
+      <div class="offer-country-flag" id="offer-flag">🇬🇧</div>
+      <div class="offer-school-name" id="offer-school"></div>
+      <div class="offer-major" id="offer-major"></div>
+      <div class="offer-rank" id="offer-rank"></div>
+    </div>
+    <button class="btn-primary" id="unbox-next-btn" style="display:none;margin-top:20px" onclick="showResult()">
+      查看完整报告 →
+    </button>
+  </div>
+</div>
+
+<!-- SCREEN 6: RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-container">
+    <div class="result-header">
+      <p class="neon-sub" style="margin-bottom:0">🎉 恭喜你获得了</p>
+    </div>
+    <div class="result-main-card">
+      <div class="result-flag" id="res-flag"></div>
+      <div class="result-school" id="res-school"></div>
+      <div class="result-major" id="res-major"></div>
+      <div class="result-rank" id="res-rank"></div>
+      <div class="result-badges" id="res-badges"></div>
+    </div>
+    <div class="result-sub-cards" id="res-sub-cards"></div>
+    <div class="result-tip">
+      <div class="result-tip-title">💡 Emma 说</div>
+      <div class="result-tip-body" id="res-tip"></div>
+    </div>
+    <div class="result-cta">
+      <div class="result-cta-title">想拿到真正的 Offer？</div>
+      <div class="result-cta-sub">
+        游戏只是开始，真实的申请比这更精彩。<br>
+        让 Emma 帮你制定专属留学规划！
+      </div>
+      <a class="cta-btn-emma" href="https://work.wujimai.com/contact.html" target="_blank">
+        👩‍🏫 立即咨询 Emma
+      </a>
+      <div class="result-share" onclick="shareResult()">📤 炫耀一下我的 Offer</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================
+   GAME DATA
+============================================ */
+
+const SCHOOLS = {
+  uk: {
+    flagship: [
+      { school:'帝国理工学院', major:'MSc Management', rank:'QS 世界第6', flag:'🇬🇧', badge:'G5超精英' },
+      { school:'伦敦大学学院', major:'MSc Computer Science', rank:'QS 世界第9', flag:'🇬🇧', badge:'G5超精英' },
+      { school:'爱丁堡大学', major:'MSc Artificial Intelligence', rank:'QS 世界第22', flag:'🇬🇧', badge:'红砖名校' },
+      { school:'曼彻斯特大学', major:'MSc Finance', rank:'QS 世界第34', flag:'🇬🇧', badge:'红砖名校' },
+      { school:'伦敦国王学院', major:'MA Education', rank:'QS 世界第40', flag:'🇬🇧', badge:'金三角名校' },
+      { school:'布里斯托大学', major:'MSc Data Science', rank:'QS 世界第54', flag:'🇬🇧', badge:'工程劲旅' },
+      { school:'华威大学', major:'MSc Business Analytics', rank:'QS 世界第67', flag:'🇬🇧', badge:'商科强校' },
+      { school:'格拉斯哥大学', major:'MSc Software Engineering', rank:'QS 世界第78', flag:'🇬🇧', badge:'老牌名校' },
+    ],
+    backup: [
+      { school:'谢菲尔德大学', major:'MA Media and Communication', rank:'QS 世界前100', flag:'🇬🇧', badge:'保底' },
+      { school:'伯明翰大学', major:'MSc Marketing', rank:'QS 世界前100', flag:'🇬🇧', badge:'保底' },
+      { school:'利兹大学', major:'MSc Fashion Management', rank:'QS 世界前100', flag:'🇬🇧', badge:'保底' },
+    ]
+  },
+  hk: {
+    flagship: [
+      { school:'香港大学', major:'Master of Finance', rank:'QS 亚洲第2 / 世界第17', flag:'🇭🇰', badge:'港三之首' },
+      { school:'香港中文大学', major:'MSc Computer Science', rank:'QS 亚洲第4 / 世界第36', flag:'🇭🇰', badge:'港三之首' },
+      { school:'香港科技大学', major:'MSc Business Analytics', rank:'QS 亚洲第5 / 世界第47', flag:'🇭🇰', badge:'科技王牌' },
+      { school:'香港理工大学', major:'MSc Accounting', rank:'QS 亚洲第21', flag:'🇭🇰', badge:'商科劲旅' },
+      { school:'香港城市大学', major:'MSc Data Science', rank:'QS 亚洲第23', flag:'🇭🇰', badge:'新晋名校' },
+    ],
+    backup: [
+      { school:'香港岭南大学', major:'MA International Business', rank:'港八大之一', flag:'🇭🇰', badge:'保底' },
+      { school:'香港浸会大学', major:'MA Communications', rank:'传媒名校', flag:'🇭🇰', badge:'保底' },
+    ]
+  },
+  au: {
+    flagship: [
+      { school:'澳大利亚国立大学', major:'Master of Computing', rank:'QS 世界第30', flag:'🇦🇺', badge:'澳洲第一' },
+      { school:'墨尔本大学', major:'Master of Management', rank:'QS 世界第33', flag:'🇦🇺', badge:'澳洲八大' },
+      { school:'悉尼大学', major:'Master of Commerce', rank:'QS 世界第41', flag:'🇦🇺', badge:'澳洲八大' },
+      { school:'新南威尔士大学', major:'MSc Financial Technology', rank:'QS 世界第45', flag:'🇦🇺', badge:'工程强校' },
+      { school:'昆士兰大学', major:'Master of Tourism Management', rank:'QS 世界第50', flag:'🇦🇺', badge:'旅游王牌' },
+      { school:'蒙纳士大学', major:'MSc Data Science', rank:'QS 世界第57', flag:'🇦🇺', badge:'药学领先' },
+    ],
+    backup: [
+      { school:'悉尼科技大学', major:'Master of Information Technology', rank:'澳洲年轻大学TOP1', flag:'🇦🇺', badge:'保底' },
+      { school:'皇家墨尔本理工大学', major:'Master of Design', rank:'设计强校', flag:'🇦🇺', badge:'保底' },
+    ]
+  },
+  sg: {
+    flagship: [
+      { school:'新加坡国立大学', major:'Master of Computing', rank:'QS 世界第8 / 亚洲第1', flag:'🇸🇬', badge:'亚洲天花板' },
+      { school:'南洋理工大学', major:'MSc Data Science', rank:'QS 世界第15 / 亚洲第3', flag:'🇸🇬', badge:'科研强校' },
+      { school:'新加坡管理大学', major:'Master of Professional Accounting', rank:'商科精英', flag:'🇸🇬', badge:'商科精品' },
+    ],
+    backup: [
+      { school:'新加坡理工学院', major:'Advanced Diploma', rank:'新加坡公立院校', flag:'🇸🇬', badge:'保底' },
+    ]
+  }
+};
+
+const QUIZ_QUESTIONS = [
+  {
+    q: '推荐信老师最可能用哪个词形容你？',
+    opts: [
+      { text: '逻辑清晰，执行力强', pts: 2 },
+      { text: '富有创意，点子多', pts: 1 },
+      { text: '善于沟通，人缘好', pts: 1 },
+      { text: '沉稳可靠，值得托付', pts: 2 },
+    ]
+  },
+  {
+    q: '如果留学期间收到拒信，你的反应是？',
+    opts: [
+      { text: '深呼吸，分析原因立刻调整策略', pts: 3 },
+      { text: '哭一场，然后马上找备选方案', pts: 2 },
+      { text: '找朋友倾诉，寻求安慰', pts: 1 },
+      { text: '怀疑人生，但还是要面对', pts: 1 },
+    ]
+  },
+  {
+    q: '你最希望留学给你带来什么？',
+    opts: [
+      { text: '顶尖人脉和职业跳板', pts: 3 },
+      { text: '独立生活的能力', pts: 2 },
+      { text: '开阔的眼界和体验', pts: 1 },
+      { text: '一张漂亮的文凭', pts: 1 },
+    ]
+  },
+  {
+    q: '凌晨两点，论文deadline还有三小时，你会？',
+    opts: [
+      { text: '已经写完了，开始润色', pts: 3 },
+      { text: '喝杯咖啡全力冲刺', pts: 2 },
+      { text: '先睡一会儿，效率更高', pts: 1 },
+      { text: '发消息问同学写到哪了', pts: 0 },
+    ]
+  },
+  {
+    q: '你最想成为哪种类型的留学生？',
+    opts: [
+      { text: '学术型：发论文、做研究', pts: 2 },
+      { text: '社交型：链接各路人脉', pts: 1 },
+      { text: '实战型：疯狂刷实习', pts: 3 },
+      { text: '体验型：环游世界', pts: 0 },
+    ]
+  },
+];
+
+const TIPS = [
+  '英国申请竞争激烈，建议提前一年开始准备，你的背景很有竞争力！',
+  '香港学校看重本科院校排名和GPA，你的条件申请港前三很有希望。',
+  '澳洲申请相对宽松，但好专业竞争也不小，早申早得是王道。',
+  '新加坡两所顶尖大学对学术成绩要求很高，但你的潜力值得一试！',
+  '商科申请建议带上GMAT/GRE，700+会大大增加竞争力。',
+  '理工科方向建议补充科研经历或相关实习，学术背景更立体。',
+];
+
+/* ============================================
+   GAME STATE
+============================================ */
+
+let gameState = {
+  power: 0,          // 实力值
+  currentQ: 0,       // 当前题目index
+  gpa: '',           // 成绩
+  lang: '',          // 语言
+  countries: [],     // 意向国家列表
+  major: '',         // 专业
+  phone: '',         // 手机号（留空=跳过）
+  mainOffer: null,   // 主录取
+  subOffers: [],     // 保底录取
+};
+
+/* ============================================
+   PARTICLES BACKGROUND
+============================================ */
+
+(function initParticles() {
+  const canvas = document.getElementById('particles-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  let animId;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  function createParticle() {
+    return {
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 2 + 0.5,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: -Math.random() * 0.5 - 0.1,
+      alpha: Math.random() * 0.5 + 0.1,
+      color: ['#a855f7','#3b82f6','#fbbf24','#ec4899'][Math.floor(Math.random()*4)]
+    };
+  }
+
+  function init() {
+    particles = [];
+    for (let i = 0; i < 60; i++) particles.push(createParticle());
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = p.color;
+      ctx.globalAlpha = p.alpha;
+      ctx.fill();
+      p.x += p.vx; p.y += p.vy;
+      if (p.y < -10) { p.y = canvas.height + 10; p.x = Math.random() * canvas.width; }
+      if (p.x < -10) p.x = canvas.width + 10;
+      if (p.x > canvas.width + 10) p.x = -10;
+    });
+    ctx.globalAlpha = 1;
+    animId = requestAnimationFrame(draw);
+  }
+
+  resize();
+  init();
+  draw();
+  window.addEventListener('resize', () => { resize(); init(); });
+})();
+
+/* ============================================
+   NAVIGATION
+============================================ */
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function updateProgress(step, total) {
+  const wrap = document.getElementById('progress-wrap');
+  const bar = document.getElementById('progress-bar');
+  const ind = document.getElementById('step-indicator');
+  if (step === 0) { wrap.style.display = 'none'; ind.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  ind.style.display = 'block';
+  ind.textContent = step + '/' + total;
+  bar.style.width = (step / total * 100) + '%';
+}
+
+/* ============================================
+   LOGIN SCREEN
+============================================ */
+
+function goLogin() {
+  showScreen('screen-login');
+}
+
+function simulateLogin() {
+  // 模拟一键登录，实际项目需接入微信 getPhoneNumber
+  const mockPhones = ['138****1234', '159****8765', '136****5432'];
+  gameState.phone = mockPhones[Math.floor(Math.random() * mockPhones.length)];
+  showScreen('screen-form');
+  updateProgress(1, 5);
+}
+
+function skipLogin() {
+  gameState.phone = '';
+  showScreen('screen-form');
+  updateProgress(1, 5);
+}
+
+/* ============================================
+   FORM LOGIC
+============================================ */
+
+function setupRadioGroup(groupId, key) {
+  const group = document.getElementById(groupId);
+  group.querySelectorAll('.radio-item').forEach(item => {
+    item.addEventListener('click', () => {
+      // 单选：取消其他选中
+      group.querySelectorAll('.radio-item').forEach(i => i.classList.remove('selected'));
+      item.classList.add('selected');
+      gameState[key] = item.dataset.val;
+    });
+  });
+}
+
+function setupCountryGroup() {
+  const group = document.getElementById('country-group');
+  group.querySelectorAll('.country-item').forEach(item => {
+    item.addEventListener('click', () => {
+      item.classList.toggle('selected');
+      // 至少选一个
+      const selected = [...group.querySelectorAll('.country-item.selected')];
+      if (selected.length === 0) {
+        item.classList.add('selected');
+      }
+      gameState.countries = selected.map(i => i.dataset.val);
+    });
+  });
+}
+
+function submitForm() {
+  // 验证必填
+  if (!gameState.gpa || !gameState.lang) {
+    alert('请先完成成绩和语言选项');
+    return;
+  }
+  gameState.countries = [...document.querySelectorAll('#country-group .country-item.selected')]
+    .map(i => i.dataset.val);
+  if (gameState.countries.length === 0) {
+    alert('请至少选择一个意向国家');
+    return;
+  }
+  gameState.major = document.getElementById('major-select').value;
+
+  // 初始化实力值
+  const gpaPts = { '3.8+': 3, '3.5+': 2, '3.0+': 1, '2.5': 0 };
+  const langPts = { '7.5+': 3, '7.0': 2, '6.5': 1, '6.0': 0 };
+  gameState.power = (gpaPts[gameState.gpa] || 0) + (langPts[gameState.lang] || 0);
+  // 随机加一点
+  gameState.power += Math.floor(Math.random() * 3);
+
+  startQuiz();
+}
+
+/* ============================================
+   QUIZ LOGIC
+============================================ */
+
+function startQuiz() {
+  gameState.currentQ = 0;
+  gameState.quizPower = gameState.power; // 用quizPower显示当前实力
+  showScreen('screen-quiz');
+  updateProgress(2, 5);
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUIZ_QUESTIONS[gameState.currentQ];
+  document.getElementById('quiz-q-num').textContent =
+    `第 ${gameState.currentQ + 1} 题 / 共 ${QUIZ_QUESTIONS.length} 题`;
+  document.getElementById('quiz-question').textContent = q.q;
+  document.getElementById('power-val').textContent = gameState.quizPower;
+  const pct = Math.min(gameState.quizPower / 15 * 100, 100);
+  document.getElementById('power-fill').style.width = pct + '%';
+
+  const container = document.getElementById('quiz-options');
+  container.innerHTML = '';
+  q.opts.forEach((opt, idx) => {
+    const btn = document.createElement('div');
+    btn.className = 'quiz-option fade-in';
+    btn.style.animationDelay = (idx * 0.08) + 's';
+    btn.innerHTML = `<span class="opt-icon">${String.fromCharCode(65+idx)}</span>${opt.text}`;
+    btn.addEventListener('click', () => selectOption(idx, opt.pts));
+    container.appendChild(btn);
+  });
+}
+
+function selectOption(idx, pts) {
+  // 高亮选中
+  document.querySelectorAll('.quiz-option').forEach((o, i) => {
+    o.classList.remove('selected');
+    if (i === idx) o.classList.add('selected');
+  });
+
+  gameState.quizPower += pts;
+  gameState.currentQ++;
+
+  setTimeout(() => {
+    if (gameState.currentQ < QUIZ_QUESTIONS.length) {
+      renderQuestion();
+      updateProgress(2 + gameState.currentQ, 5);
+    } else {
+      // 答题结束，计入总实力值
+      gameState.power = gameState.quizPower;
+      startUnbox();
+    }
+  }, 500);
+}
+
+/* ============================================
+   UNBOXING LOGIC
+============================================ */
+
+function startUnbox() {
+  showScreen('screen-unbox');
+  updateProgress(4, 5);
+  document.getElementById('unbox-next-btn').style.display = 'none';
+
+  // 计算 Offer
+  computeOffers();
+
+  const unboxTexts = ['🎰 命运齿轮转动中...', '✨ 魔法正在发生...', '📮 你的信封即将开启...'];
+  let tIdx = 0;
+  const textEl = document.getElementById('unbox-text');
+
+  const textTimer = setInterval(() => {
+    tIdx = (tIdx + 1) % unboxTexts.length;
+    textEl.textContent = unboxTexts[tIdx];
+  }, 800);
+
+  // 3秒后开箱
+  setTimeout(() => {
+    clearInterval(textTimer);
+    textEl.textContent = '🎉 你的 Offer 来啦！';
+    document.getElementById('unbox-text').style.color = '#fbbf24';
+
+    // 填充 Offer 数据
+    const o = gameState.mainOffer;
+    document.getElementById('offer-flag').textContent = o.flag;
+    document.getElementById('offer-school').textContent = o.school;
+    document.getElementById('offer-major').textContent = o.major;
+    document.getElementById('offer-rank').textContent = o.rank;
+    document.getElementById('offer-badge').textContent = '🎉 ' + o.badge;
+
+    // 翻转动画
+    setTimeout(() => {
+      document.getElementById('offer-card').classList.add('revealed');
+      document.getElementById('unbox-next-btn').style.display = 'block';
+      updateProgress(5, 5);
+    }, 300);
+  }, 3000);
+}
+
+function computeOffers() {
+  const countries = gameState.countries;
+  const power = gameState.power;
+  // 实力分段
+  // 15+: flagship[0-1], 10-14: flagship[2-4], 5-9: flagship[5-], <5: flagship last or backup
+  let tier, backupCount;
+  if (power >= 15) { tier = 0; backupCount = 1; }
+  else if (power >= 12) { tier = 1; backupCount = 1; }
+  else if (power >= 9) { tier = 2; backupCount = 1; }
+  else if (power >= 6) { tier = 4; backupCount = 2; }
+  else { tier = 6; backupCount = 2; }
+
+  // 从第一个国家取主offer，其他国家取backup
+  const mainCountry = countries[0];
+  const pool = SCHOOLS[mainCountry] || SCHOOLS.uk;
+  const flagship = pool.flagship;
+  const mainIdx = Math.min(tier, flagship.length - 1);
+  gameState.mainOffer = flagship[mainIdx];
+
+  // 保底offer：优先从其他国家取
+  const subOffers = [];
+  for (let i = 1; i < countries.length && subOffers.length < backupCount; i++) {
+    const c = countries[i];
+    const p = SCHOOLS[c] || SCHOOLS.uk;
+    subOffers.push(p.backup[Math.floor(Math.random() * p.backup.length)]);
+  }
+  // 如果还不够，从同国家取
+  while (subOffers.length < backupCount) {
+    const extras = pool.backup.filter(b => !subOffers.find(s => s.school === b.school));
+    if (extras.length > 0) subOffers.push(extras[Math.floor(Math.random() * extras.length)]);
+    else break;
+  }
+  gameState.subOffers = subOffers;
+}
+
+/* ============================================
+   RESULT LOGIC
+============================================ */
+
+function showResult() {
+  showScreen('screen-result');
+  updateProgress(5, 5);
+
+  const o = gameState.mainOffer;
+  document.getElementById('res-flag').textContent = o.flag;
+  document.getElementById('res-school').textContent = o.school;
+  document.getElementById('res-major').textContent = o.major;
+  document.getElementById('res-rank').textContent = o.rank;
+
+  // 标签
+  const badgesEl = document.getElementById('res-badges');
+  const badgeList = ['主录取'];
+  if (gameState.power >= 12) badgeList.push('冲刺院校');
+  if (gameState.power < 8) badgeList.push('适合当前背景');
+  badgesEl.innerHTML = badgeList.map(b =>
+    `<span class="badge-pill">${b}</span>`
+  ).join('');
+
+  // 保底学校
+  const subEl = document.getElementById('res-sub-cards');
+  subEl.innerHTML = gameState.subOffers.map(o => `
+    <div class="sub-card">
+      <span class="sc-flag">${o.flag}</span>
+      <div class="sc-info">
+        <div class="sc-school">${o.school}</div>
+        <div class="sc-major">${o.major}</div>
+      </div>
+      <span class="sc-tag">${o.badge}</span>
+    </div>
+  `).join('');
+
+  // Emma tip
+  const tipIdx = (gameState.power + gameState.gpa.length) % TIPS.length;
+  document.getElementById('res-tip').textContent = TIPS[tipIdx];
+}
+
+function shareResult() {
+  const text = `🎓 我的留学 Offer 是 ${gameState.mainOffer.school} ${gameState.mainOffer.major}！\n想知道你的 Offer 是什么吗？快来测试 →`;
+  if (navigator.share) {
+    navigator.share({ title: 'Offer 开箱', text });
+  } else {
+    // 复制到剪贴板
+    navigator.clipboard.writeText(text).then(() => {
+      alert('已复制到剪贴板，快去分享给朋友吧！');
+    });
+  }
+}
+
+/* ============================================
+   INIT
+============================================ */
+
+setupRadioGroup('gpa-group', 'gpa');
+setupRadioGroup('lang-group', 'lang');
+setupCountryGroup();
+
+// 默认选中
+gameState.gpa = '3.5+';
+gameState.lang = '6.5';
+gameState.countries = ['uk', 'hk', 'au', 'sg'];
+</script>
+</body>
+</html>
